@@ -1,4 +1,5 @@
 // app/page.tsx
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -19,6 +20,11 @@ export default function Home() {
             <button className="bg-white text-blue-600 px-6 py-3 rounded-full border border-blue-300 shadow hover:bg-blue-50 transition font-semibold">
               📞 Contactar
             </button>
+            <Link href="/auto">
+              <button className="bg-green-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-green-700 transition font-semibold">
+                🏎️ Info de un Auto
+              </button>
+            </Link>
           </div>
         </div>
       </section>
