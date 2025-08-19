@@ -6,9 +6,9 @@ Bienvenido a **Amautos**, una plataforma web simple y divertida para gestionar e
 
 ## ¿Qué podés hacer?
 
-- **Registrarte e iniciar sesión** como cliente o administrador.
+- **Registrarte e iniciar sesión** como cliente o administrador. Por el momento el admin se define desde el dashboard de Firebase. Es un booleano asociado al usuario que se llama "esAdmin".
 - **Ver todos los autos disponibles** para alquilar, con fotos y detalles.
-- **Reservar un auto** de manera fácil y rápida, ¡sin compromiso!
+- **Reservar un auto** de manera fácil y rápida.
 - **Administrar autos** (solo admins): agregar nuevos autos con foto y modelo.
 
 ---
@@ -31,7 +31,7 @@ Bienvenido a **Amautos**, una plataforma web simple y divertida para gestionar e
 - Guardar reservas en Firestore
 - Mejorar validaciones de formularios
 - Agregar feedback visual a las acciones
-- Mejorar la experiencia mobile
+- Hostear la página con un dominio gratis con Netlify.
 
 ---
 
@@ -41,7 +41,3 @@ Bienvenido a **Amautos**, una plataforma web simple y divertida para gestionar e
 2. Instalá las dependencias con `npm install`.
 3. Configurá tu archivo `.env.local` con las credenciales de Firebase.
 4. Ejecutá `npm run dev` y abrí [http://localhost:3000](http://localhost:3000).
-
----
-
-¡Cualquier duda o sugerencia es bienvenida! ✨
