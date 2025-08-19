@@ -1,8 +1,8 @@
 "use client";
-
 import { useState } from "react";
 import { register } from "@/lib/firebaseAuth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -15,7 +15,7 @@ export default function RegisterPage() {
     setError(null);
     try {
       await register(email, password);
-      router.push("/profile"); // redirigí al perfil tras registro y login automático
+      router.push("/profile");
     } catch (err: any) {
       setError(err.message);
     }
@@ -40,6 +40,12 @@ export default function RegisterPage() {
       />
       <button type="submit">Registrarse</button>
       {error && <p style={{ color: "red" }}>{error}</p>}
+      <p>
+        ¿Ya tenés cuenta?{" "}
+        <Link href="/login" style={{ color: "blue", textDecoration: "underline" }}>
+          Entrá acá
+        </Link>
+      </p>
     </form>
   );
 }
