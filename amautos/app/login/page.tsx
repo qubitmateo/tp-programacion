@@ -3,6 +3,7 @@ import { useState } from "react";
 import { login } from "@/lib/firebaseAuth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -12,7 +13,6 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("submit disparado");
     setError(null);
     try {
       await login(email, password);
@@ -23,31 +23,46 @@ export default function LoginPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h1>Iniciar sesión</h1>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">Entrar</button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <p>
-        ¿No tenés cuenta?{" "}
-        <Link href="/register" style={{ color: "blue", textDecoration: "underline" }}>
-          Registrate acá
-        </Link>
-      </p>
-    </form>
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-200">
+      <motion.form
+        onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+  className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md flex flex-col gap-6 text-black"
+      >
+  <h1 className="text-3xl font-bold text-blue-900 mb-2 text-center">Iniciar sesión</h1>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition text-black placeholder-gray-500"
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition text-black placeholder-gray-500"
+        />
+        <button
+          type="submit"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
+        >
+          Entrar
+        </button>
+        {error && <p className="text-red-600 text-center">{error}</p>}
+        <p className="text-center">
+          ¿No tenés cuenta?{' '}
+          <Link href="/register" className="text-blue-600 underline hover:text-blue-800 transition">
+            Registrate acá
+          </Link>
+        </p>
+      </motion.form>
+    </main>
   );
 }
 
