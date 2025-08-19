@@ -1,10 +1,16 @@
-Sistema para gestionar el alquiler de autos
 
-La aplicación debe contar con las siguientes características:
+# 🚗 Consigna - Sistema de Alquiler de Autos
 
-1: Sistema de login, que permita controlar/validar a los usuarios que pueden hacer uso de la aplicación.
-2: Crear un sistema para gestionar el alquiler de autos.
-3: Sistema de logueo para administradores y clientes.
-4: Los administradores pueden añadir, borrar y modificar autos (marca, modelo, año, precio por día, disponibilidad).
-5: Los clientes pueden buscar vehículos disponibles, ver detalles y hacer reservas de vehículos.
+Desarrollar una aplicación web para gestionar el alquiler de autos, con las siguientes características:
 
+---
+
+## ✨ Requisitos principales
+
+1. **Login de usuarios**: Control y validación de acceso.
+2. **Gestión de autos**: Alta, baja y modificación de vehículos.
+3. **Roles**: Administradores y clientes, cada uno con permisos específicos.
+4. **Administradores**:
+	- Añadir, borrar y modificar autos (marca, modelo, año, precio por día, disponibilidad).
+5. **Clientes**:
+	- Buscar autos disponibles, ver detalles y hacer reservas.

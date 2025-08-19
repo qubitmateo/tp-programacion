@@ -15,6 +15,7 @@ export default function Page() {
   const [imageUrl, setImageUrl] = useState("");
   const [cars, setCars] = useState<any[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);
+  const [bookingCar, setBookingCar] = useState<any | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -128,8 +129,8 @@ export default function Page() {
 
           {/* Dialogo para agregar auto */}
           {showDialog && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-              <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col gap-4 w-full max-w-sm">
+            <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col gap-4 w-full max-w-sm text-black">
                 <h2 className="text-xl font-bold mb-2">Agregar auto</h2>
                 <input
                   type="text"
@@ -178,24 +179,80 @@ export default function Page() {
 
           {/* Car list */}
           <div className="w-full max-w-5xl mt-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-700 text-left flex items-center gap-2">
-              <span role="img" aria-label="llave">🔑</span> Autos disponibles
-            </h2>
-            {loadingCars ? (
-              <p className="text-yellow-700">Cargando autos...</p>
-            ) : cars.length === 0 ? (
-              <p className="text-yellow-700">Todavía no hay autos cargados. ¡Animate a ser el primero!</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                {cars.map(car => (
-                  <div key={car.id} className="bg-yellow-50 rounded-lg shadow p-4 flex flex-col items-center hover:shadow-lg transition border border-yellow-100">
-                    <img src={car.imageUrl} alt={car.model} className="w-56 h-36 object-cover rounded mb-3 border border-yellow-200" />
-                    <span className="font-bold text-lg text-yellow-800 mb-1">{car.model}</span>
-                    <span className="text-yellow-700 text-sm">¡Listo para tu próxima aventura!</span>
+              <h2 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-700 text-left flex items-center gap-2">
+                <span role="img" aria-label="llave">🔑</span> Autos disponibles
+              </h2>
+              {loadingCars ? (
+                <p className="text-yellow-700">Cargando autos...</p>
+              ) : cars.length === 0 ? (
+                <p className="text-yellow-700">Todavía no hay autos cargados. ¡Animate a ser el primero!</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  {cars.map(car => (
+                    <div
+                      key={car.id}
+                      className="group bg-yellow-50 rounded-2xl shadow-lg p-0 flex flex-col items-stretch hover:shadow-2xl transition border border-yellow-100 cursor-pointer overflow-hidden relative"
+                      onClick={() => setBookingCar(car)}
+                    >
+                      <div className="relative w-full h-44 overflow-hidden">
+                        <img
+                          src={car.imageUrl}
+                          alt={car.model}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <span className="absolute top-2 left-2 bg-white/80 text-yellow-700 text-xs font-bold px-2 py-1 rounded shadow flex items-center gap-1">
+                          <span role="img" aria-label="auto">🚗</span> Nuevo
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-1 p-4 flex-1">
+                        <span className="font-bold text-lg text-yellow-800 mb-1 truncate">{car.model}</span>
+                        <span className="text-yellow-700 text-sm mb-2">¡Listo para tu próxima aventura!</span>
+                        <button
+                          className="mt-auto bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-4 rounded-lg transition shadow w-full"
+                          onClick={e => {
+                            e.stopPropagation();
+                            setBookingCar(car);
+                          }}
+                        >
+                          Reservar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* Booking Modal */}
+              {bookingCar && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md flex flex-col items-center gap-4 relative text-black">
+                    <button
+                      className="absolute top-2 right-2 text-xl text-yellow-700 hover:text-pink-500"
+                      onClick={() => setBookingCar(null)}
+                    >
+                      ×
+                    </button>
+                    <img src={bookingCar.imageUrl} alt={bookingCar.model} className="w-60 h-36 object-cover rounded mb-2 border border-yellow-200" />
+                    <h3 className="text-2xl font-bold text-yellow-800 mb-2 flex items-center gap-2"><span role="img" aria-label="auto">🚗</span> {bookingCar.model}</h3>
+                    <p className="text-yellow-700 text-center mb-4">¿Querés reservar este auto? Completá tus datos y te lo guardamos. ¡Sin compromiso!</p>
+                    <input
+                      type="text"
+                      placeholder="Tu nombre"
+                      className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition text-black w-full"
+                    />
+                    <input
+                      type="email"
+                      placeholder="Tu email"
+                      className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition text-black w-full"
+                    />
+                    <button
+                      className="bg-green-400 hover:bg-green-500 text-green-900 font-bold py-2 px-8 rounded-lg transition text-lg shadow w-full mt-2"
+                      onClick={() => { setBookingCar(null); alert('¡Reserva enviada! Pronto te contactamos.'); }}
+                    >
+                      Confirmar reserva
+                    </button>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              )}
           </div>
         </section>
       </main>
