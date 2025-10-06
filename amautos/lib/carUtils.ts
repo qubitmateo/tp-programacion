@@ -76,6 +76,19 @@ export async function rentCar(id: string, userId: string, days: number) {
 }
 
 // -----------------------------
+// Eliminar alquiler (liberar auto)
+// -----------------------------
+export async function deleteRent(id: string) {
+  const carRef = doc(db, "Autos", id);
+  await updateDoc(carRef, {
+    rentedBy: null,
+    rentDate: null,
+    endDate: null
+  });
+}
+
+
+// -----------------------------
 // Obtener autos de un usuario
 // -----------------------------
 export async function getUserBookings(userId: string): Promise<Car[]> {

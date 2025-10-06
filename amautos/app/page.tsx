@@ -9,6 +9,7 @@ import { Car } from "@/lib/carUtils";
 export default function Page() {
   const router = useRouter();
   const { user, loading } = useAuth();
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [model, setModel] = useState("");
@@ -19,6 +20,7 @@ export default function Page() {
   const [bookingCar, setBookingCar] = useState<Car | null>(null);
   const [daysToRent, setDaysToRent] = useState<number>(1);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
+  const [showRentedOnly, setShowRentedOnly] = useState(false);
 
   // -----------------------------
   // Carga inicial
@@ -55,7 +57,7 @@ export default function Page() {
   };
 
   // -----------------------------
-  // Guardar auto (agregar o editar)
+  // Guardar auto
   // -----------------------------
   const saveCar = async () => {
     if (!model || !imageUrl || dailyRate <= 0) return;
@@ -94,6 +96,16 @@ export default function Page() {
     refreshCars();
   };
 
+  // -----------------------------
+  // Eliminar alquiler
+  // -----------------------------
+  const deleteRent = async (carId: string) => {
+    if (!confirm("¿Seguro que querés eliminar este alquiler?")) return;
+    const { deleteRent } = await import("@/lib/carUtils");
+    await deleteRent(carId);
+    refreshCars();
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
@@ -124,6 +136,11 @@ export default function Page() {
 
   if (!user) return null;
 
+  // Filtrar autos alquilados si está activo el modo “ver alquilados”
+  const displayedCars = showRentedOnly
+    ? cars.filter((c) => c.rentedBy)
+    : cars;
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex flex-col text-white">
       {/* Top bar */}
@@ -138,6 +155,25 @@ export default function Page() {
           >
             Mi perfil
           </button>
+          {isAdmin && (
+            <>
+              <button
+                onClick={() => setShowRentedOnly((prev) => !prev)}
+                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
+              >
+                {showRentedOnly ? "Ver todos" : "Ver alquilados"}
+              </button>
+              <button
+                onClick={() => {
+                  setEditingCar(null);
+                  setShowDialog(true);
+                }}
+                className="bg-gradient-to-r from-emerald-400 to-cyan-500 hover:opacity-90 text-black font-bold py-2 px-5 rounded-lg transition shadow"
+              >
+                + Agregar auto
+              </button>
+            </>
+          )}
           <button
             onClick={handleLogout}
             className="bg-gradient-to-r from-pink-500 to-red-500 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
@@ -147,98 +183,23 @@ export default function Page() {
         </div>
       </nav>
 
-      {/* Hero section */}
+      {/* Lista de autos */}
       <section className="flex flex-col items-center justify-center flex-1 py-10 px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="w-full max-w-3xl text-center"
-        >
-          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-4 drop-shadow">
-            🚙 ¿Querés alquilar un auto?
-          </h1>
-          <p className="text-lg md:text-xl text-gray-300 mb-8">
-            En Amautos, te llevás el auto que querés, sin trámites raros ni letra chica. Elegí, reservá y salí a la ruta. 🚀
-          </p>
-          {isAdmin && (
-            <button
-              onClick={() => {
-                setEditingCar(null);
-                setShowDialog(true);
-              }}
-              className="bg-gradient-to-r from-emerald-400 to-cyan-500 hover:opacity-90 text-black font-bold py-3 px-8 rounded-lg transition text-lg mb-8 shadow"
-            >
-              + Agregar auto
-            </button>
-          )}
-        </motion.div>
-
-        {/* Modal agregar/editar auto */}
-        {showDialog && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur">
-            <div className="bg-gray-900/90 border border-gray-700 rounded-xl shadow-lg p-8 flex flex-col gap-4 w-full max-w-sm text-white">
-              <h2 className="text-xl font-bold mb-2 text-cyan-400">
-                {editingCar ? "Editar auto" : "Agregar auto"}
-              </h2>
-              <input
-                type="text"
-                placeholder="Modelo"
-                value={model}
-                onChange={e => setModel(e.target.value)}
-                className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
-              />
-              <input
-                type="url"
-                placeholder="URL de la imagen"
-                value={imageUrl}
-                onChange={e => setImageUrl(e.target.value)}
-                className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
-              />
-              <input
-                type="number"
-                placeholder="Precio diario"
-                value={dailyRate}
-                onChange={e => setDailyRate(Number(e.target.value))}
-                className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
-              />
-              <div className="flex gap-2 mt-2">
-                <button
-                  onClick={saveCar}
-                  className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:opacity-90 text-black font-semibold py-2 px-4 rounded-lg transition"
-                >
-                  Guardar
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDialog(false);
-                    setEditingCar(null);
-                  }}
-                  className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Lista de autos */}
-        <div className="w-full max-w-5xl mt-12">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-cyan-400 text-left flex items-center gap-2">
-            🔑 Autos disponibles
+        <div className="w-full max-w-5xl">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-cyan-400 flex items-center gap-2">
+            {showRentedOnly ? "🚫 Autos alquilados" : "🔑 Autos disponibles"}
           </h2>
+
           {loadingCars ? (
             <p className="text-gray-400">Cargando autos...</p>
-          ) : cars.length === 0 ? (
-            <p className="text-gray-400">Todavía no hay autos cargados.</p>
+          ) : displayedCars.length === 0 ? (
+            <p className="text-gray-400">No hay autos para mostrar.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {cars.map(car => (
+              {displayedCars.map((car) => (
                 <div
                   key={car.id}
-                  className="group bg-gray-900/60 border border-gray-800 rounded-2xl shadow-lg p-0 flex flex-col items-stretch hover:border-cyan-400 transition cursor-pointer overflow-hidden relative"
-                  onClick={() => setBookingCar(car)}
+                  className="group bg-gray-900/60 border border-gray-800 rounded-2xl shadow-lg p-0 flex flex-col hover:border-cyan-400 transition overflow-hidden relative"
                 >
                   <div className="relative w-full h-44 overflow-hidden">
                     <img
@@ -251,16 +212,32 @@ export default function Page() {
                     </span>
                   </div>
                   <div className="flex flex-col gap-1 p-4 flex-1">
-                    <span className="font-bold text-lg text-white mb-1 truncate">{car.model}</span>
-                    <span className="text-gray-400 text-sm mb-2">
-                      {car.rentedBy ? "❌ Ya alquilado" : "✅ Disponible"}
+                    <span className="font-bold text-lg text-white mb-1 truncate">
+                      {car.model}
                     </span>
+
+                    {car.rentedBy ? (
+                      <>
+                        <span className="text-red-400 text-sm">
+                          ❌ Alquilado por: {car.renterEmail || car.rentedBy}
+                        </span>
+                        {isAdmin && (
+                          <button
+                            onClick={() => deleteRent(car.id)}
+                            className="mt-2 bg-gradient-to-r from-red-500 to-pink-600 hover:opacity-90 text-white font-semibold py-1 px-3 rounded-lg transition text-sm"
+                          >
+                            Eliminar alquiler
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-green-400 text-sm">✅ Disponible</span>
+                    )}
 
                     {isAdmin && (
                       <div className="flex gap-2 mt-2">
                         <button
-                          onClick={e => {
-                            e.stopPropagation();
+                          onClick={() => {
                             setEditingCar(car);
                             setModel(car.model);
                             setImageUrl(car.imageUrl);
@@ -272,8 +249,7 @@ export default function Page() {
                           Editar
                         </button>
                         <button
-                          onClick={async e => {
-                            e.stopPropagation();
+                          onClick={async () => {
                             if (confirm("¿Seguro que querés eliminar este auto?")) {
                               await deleteCar(car.id);
                             }
@@ -286,20 +262,17 @@ export default function Page() {
                     )}
 
                     {!isAdmin && !car.rentedBy && (
-                      <div className="mt-auto">
+                      <div className="mt-4">
                         <input
                           type="number"
                           min={1}
                           value={daysToRent}
-                          onChange={e => setDaysToRent(Number(e.target.value))}
+                          onChange={(e) => setDaysToRent(Number(e.target.value))}
                           className="w-full mb-2 px-2 py-1 rounded-lg text-black focus:outline-none"
                           placeholder="Días a alquilar"
                         />
                         <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            rentCar(car.id);
-                          }}
+                          onClick={() => rentCar(car.id)}
                           className="bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition shadow w-full"
                         >
                           Reservar
@@ -313,6 +286,55 @@ export default function Page() {
           )}
         </div>
       </section>
+
+      {/* Modal agregar/editar auto */}
+      {showDialog && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur">
+          <div className="bg-gray-900/90 border border-gray-700 rounded-xl shadow-lg p-8 flex flex-col gap-4 w-full max-w-sm text-white">
+            <h2 className="text-xl font-bold mb-2 text-cyan-400">
+              {editingCar ? "Editar auto" : "Agregar auto"}
+            </h2>
+            <input
+              type="text"
+              placeholder="Modelo"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
+            />
+            <input
+              type="url"
+              placeholder="URL de la imagen"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
+            />
+            <input
+              type="number"
+              placeholder="Precio diario"
+              value={dailyRate}
+              onChange={(e) => setDailyRate(Number(e.target.value))}
+              className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={saveCar}
+                className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:opacity-90 text-black font-semibold py-2 px-4 rounded-lg transition"
+              >
+                Guardar
+              </button>
+              <button
+                onClick={() => {
+                  setShowDialog(false);
+                  setEditingCar(null);
+                }}
+                className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

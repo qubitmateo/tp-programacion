@@ -22,14 +22,13 @@ export default function ProfilePage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [userCars, setUserCars] = useState<Car[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);
-
   const [isAdmin, setIsAdmin] = useState(false);
+
   const [showDialog, setShowDialog] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
   const [model, setModel] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [dailyRate, setDailyRate] = useState<number>(0);
-
   const [daysToRent, setDaysToRent] = useState(1);
 
   useEffect(() => {
@@ -95,6 +94,17 @@ export default function ProfilePage() {
     setDaysToRent(1);
   };
 
+  // -----------------------------
+  // Eliminar alquiler
+  // -----------------------------
+  const handleDeleteRent = async (carId: string) => {
+    if (!confirm("¿Seguro que querés eliminar este alquiler?")) return;
+    const { deleteRent } = await import("@/lib/carUtils");
+    await deleteRent(carId);
+    await fetchCars();
+    await fetchUserCars();
+  };
+
   const handleLogout = async () => {
     const { logout } = await import("@/lib/firebaseAuth");
     await logout();
@@ -123,12 +133,20 @@ export default function ProfilePage() {
         <span className="text-2xl font-extrabold tracking-wide flex items-center gap-2 text-cyan-400">
           👤 Mi perfil
         </span>
-        <button
-          onClick={handleLogout}
-          className="bg-gradient-to-r from-pink-500 to-red-500 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
-        >
-          Cerrar sesión
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => router.push("/profile")}
+            className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
+          >
+            Ver perfil
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-gradient-to-r from-pink-500 to-red-500 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </nav>
 
       {/* User info */}
@@ -166,6 +184,12 @@ export default function ProfilePage() {
                 <p className="text-gray-400">
                   Hasta: {car.endDate?.toLocaleDateString()}
                 </p>
+                <button
+                  onClick={() => handleDeleteRent(car.id)}
+                  className="mt-2 bg-gradient-to-r from-red-500 to-pink-500 hover:opacity-90 text-white font-semibold py-2 rounded-lg transition"
+                >
+                  Eliminar alquiler
+                </button>
               </div>
             ))}
           </div>
