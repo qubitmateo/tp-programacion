@@ -5,54 +5,60 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  Car,
   getCars,
   getUserBookings,
   addCar,
   updateCar,
   deleteCar,
   rentCar,
-  Car
+  deleteRent,
 } from "@/lib/carUtils";
+import { getUserData, getUserAdmin } from "@/lib/userUtils";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, loading } = useAuth();
 
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const [cars, setCars] = useState<Car[]>([]);
   const [userCars, setUserCars] = useState<Car[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const [showDialog, setShowDialog] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
   const [model, setModel] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [dailyRate, setDailyRate] = useState<number>(0);
-  const [daysToRent, setDaysToRent] = useState(1);
 
+  // -----------------------------
+  // Carga inicial
+  // -----------------------------
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace("/login");
-      } else {
-        setProfileLoaded(true);
+    if (!loading && !user) {
+      router.replace("/login");
+    }
 
-        import("@/lib/userUtils").then(async ({ getUserAdmin }) => {
-          const admin = await getUserAdmin(user.uid);
-          setIsAdmin(admin);
-        });
+    if (user) {
+      setProfileLoaded(true);
 
-        fetchCars();
-        fetchUserCars();
-      }
+      // Cargar datos del usuario
+      getUserData(user.uid).then((data) => setUserData(data));
+
+      getUserAdmin(user.uid).then((admin) => setIsAdmin(admin));
+
+      fetchCars();
+      fetchUserCars();
     }
   }, [loading, user, router]);
 
   const fetchCars = async () => {
     setLoadingCars(true);
     const allCars = await getCars();
-    setCars(allCars.filter(car => !car.rentedBy));
+    setCars(allCars.filter((car) => !car.rentedBy));
     setLoadingCars(false);
   };
 
@@ -62,7 +68,19 @@ export default function ProfilePage() {
     setUserCars(bookings);
   };
 
-  const handleSaveCar = async () => {
+  // -----------------------------
+  // Logout
+  // -----------------------------
+  const handleLogout = async () => {
+    const { logout } = await import("@/lib/firebaseAuth");
+    await logout();
+    router.push("/login");
+  };
+
+  // -----------------------------
+  // Guardar auto
+  // -----------------------------
+  const saveCar = async () => {
     if (!model || !imageUrl || dailyRate <= 0) return;
     if (editingCar) {
       await updateCar(editingCar.id, model, imageUrl, dailyRate);
@@ -74,41 +92,30 @@ export default function ProfilePage() {
     setModel("");
     setImageUrl("");
     setDailyRate(0);
-    await fetchCars();
-    await fetchUserCars();
+    fetchCars();
+    fetchUserCars();
   };
 
+  // -----------------------------
+  // Eliminar auto
+  // -----------------------------
   const handleDeleteCar = async (id: string) => {
     if (confirm("¿Seguro que querés eliminar este auto?")) {
       await deleteCar(id);
-      await fetchCars();
-      await fetchUserCars();
+      fetchCars();
+      fetchUserCars();
     }
-  };
-
-  const handleRentCar = async (carId: string) => {
-    if (!user) return;
-    await rentCar(carId, user.uid, daysToRent);
-    await fetchCars();
-    await fetchUserCars();
-    setDaysToRent(1);
   };
 
   // -----------------------------
   // Eliminar alquiler
   // -----------------------------
-  const handleDeleteRent = async (carId: string) => {
-    if (!confirm("¿Seguro que querés eliminar este alquiler?")) return;
-    const { deleteRent } = await import("@/lib/carUtils");
-    await deleteRent(carId);
-    await fetchCars();
-    await fetchUserCars();
-  };
-
-  const handleLogout = async () => {
-    const { logout } = await import("@/lib/firebaseAuth");
-    await logout();
-    router.push("/login");
+  const handleDeleteRent = async (id: string) => {
+    if (confirm("¿Seguro que querés eliminar este alquiler?")) {
+      await deleteRent(id);
+      fetchCars();
+      fetchUserCars();
+    }
   };
 
   if (!profileLoaded) {
@@ -133,12 +140,12 @@ export default function ProfilePage() {
         <span className="text-2xl font-extrabold tracking-wide flex items-center gap-2 text-cyan-400">
           👤 Mi perfil
         </span>
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <button
-            onClick={() => router.push("/profile")}
-            className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
+            onClick={() => router.push("/")}
+            className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
           >
-            Ver perfil
+            Página principal
           </button>
           <button
             onClick={handleLogout}
@@ -149,24 +156,39 @@ export default function ProfilePage() {
         </div>
       </nav>
 
-      {/* User info */}
+      {/* Información del usuario */}
       <section className="flex flex-col items-center justify-center py-10 px-4">
         <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2 drop-shadow">
-          ¡Bienvenido!
+          👋 Hola, {userData?.username || user?.email}!
         </h1>
-        <p className="text-gray-300">{user?.email}</p>
+        <p className="text-gray-300 mb-1">📧 {user?.email}</p>
+        <p className="text-gray-400 text-sm">
+          🗓 Registrado el:{" "}
+          {userData?.createdAt.toLocaleDateString("es-AR", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </p>
+
+        <p className="text-gray-400 mb-4">
+          🚗 Autos alquilados: {userCars.length}
+        </p>
       </section>
 
+      {/* Autos alquilados */}
       <section className="w-full max-w-5xl mx-auto px-4 pb-12">
-        {/* Mis autos */}
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-cyan-400">
           🚗 Mis autos alquilados
         </h2>
         {userCars.length === 0 ? (
-          <p className="text-gray-400">No tenés autos alquilados actualmente.</p>
+          <p className="text-gray-400">
+            No tenés autos alquilados actualmente.
+          </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {userCars.map(car => (
+            {userCars.map((car) => (
               <div
                 key={car.id}
                 className="bg-gray-900/70 border border-gray-800 rounded-xl shadow p-4 flex flex-col gap-2 hover:border-cyan-400 transition"
@@ -184,18 +206,77 @@ export default function ProfilePage() {
                 <p className="text-gray-400">
                   Hasta: {car.endDate?.toLocaleDateString()}
                 </p>
-                <button
-                  onClick={() => handleDeleteRent(car.id)}
-                  className="mt-2 bg-gradient-to-r from-red-500 to-pink-500 hover:opacity-90 text-white font-semibold py-2 rounded-lg transition"
-                >
-                  Eliminar alquiler
-                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeleteRent(car.id)}
+                    className="mt-2 bg-gradient-to-r from-red-500 to-pink-600 hover:opacity-90 text-white font-semibold py-1 px-3 rounded-lg transition text-sm"
+                  >
+                    Eliminar alquiler
+                  </button>
+                )}
               </div>
             ))}
           </div>
         )}
       </section>
+
+      {/* Modal agregar/editar auto */}
+      {showDialog && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur">
+          <div className="bg-gray-900/90 border border-gray-700 rounded-xl shadow-lg p-8 flex flex-col gap-4 w-full max-w-sm text-white">
+            <h2 className="text-xl font-bold mb-2 text-cyan-400">
+              {editingCar ? "Editar auto" : "Agregar auto"}
+            </h2>
+
+            <input
+              type="text"
+              placeholder="Modelo"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
+            />
+
+            <input
+              type="url"
+              placeholder="URL de la imagen"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
+            />
+
+            {/* Texto y input de precio */}
+            <label className="text-gray-300 font-semibold flex items-center gap-2">
+              💰 Precio por día
+            </label>
+            <input
+              type="number"
+              placeholder="Precio diario"
+              value={dailyRate}
+              onChange={(e) => setDailyRate(Number(e.target.value))}
+              min={0}
+              className="w-full px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition appearance-none"
+            />
+
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={saveCar}
+                className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:opacity-90 text-black font-semibold py-2 px-4 rounded-lg transition"
+              >
+                Guardar
+              </button>
+              <button
+                onClick={() => {
+                  setShowDialog(false);
+                  setEditingCar(null);
+                }}
+                className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
-
