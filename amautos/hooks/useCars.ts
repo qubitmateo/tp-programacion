@@ -38,14 +38,16 @@ export function useCars() {
     refreshCars();
   };
 
+  // ✅ Updated rentCar to accept startDate and endDate
   const rentCar = async (
     carId: string,
     userId: string,
-    days: number,
-    email?: string,
+    startDate: string | Date,
+    endDate: string | Date,
+    renterUsername?: string,
   ) => {
     const { rentCar } = await import("@/lib/carUtils");
-    await rentCar(carId, userId, days, email);
+    await rentCar(carId, userId, startDate, endDate, renterUsername);
     refreshCars();
   };
 

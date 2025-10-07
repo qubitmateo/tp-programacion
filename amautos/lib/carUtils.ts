@@ -1,3 +1,5 @@
+"use client";
+
 import db from "./firestore";
 import {
   collection,
@@ -14,7 +16,7 @@ export interface Car {
   imageUrl: string;
   dailyRate: number;
   rentedBy?: string | null;
-  renterUsername?: string | null; // <-- nuevo
+  renterUsername?: string | null;
   rentDate?: Date | null;
   endDate?: Date | null;
   createdAt: Date;
@@ -33,7 +35,7 @@ export async function addCar(
     imageUrl,
     dailyRate,
     rentedBy: null,
-    renterUsername: null, // <-- nuevo
+    renterUsername: null,
     rentDate: null,
     endDate: null,
     createdAt: new Date(),
@@ -79,24 +81,24 @@ export async function deleteCar(id: string) {
 }
 
 // -----------------------------
-// Reservar auto
+// Reservar auto con fechas
 // -----------------------------
 export async function rentCar(
   id: string,
   userId: string,
-  days: number,
+  startDate: string | Date,
+  endDate: string | Date,
   renterUsername?: string,
 ) {
   const carRef = doc(db, "Autos", id);
-  const rentDate = new Date();
-  const endDate = new Date();
-  endDate.setDate(rentDate.getDate() + days);
+  const rentDate = new Date(startDate);
+  const end = new Date(endDate);
 
   await updateDoc(carRef, {
     rentedBy: userId,
-    renterUsername: renterUsername || null, // <-- guardamos username
+    renterUsername: renterUsername || null,
     rentDate,
-    endDate,
+    endDate: end,
   });
 }
 
@@ -107,7 +109,7 @@ export async function deleteRent(id: string) {
   const carRef = doc(db, "Autos", id);
   await updateDoc(carRef, {
     rentedBy: null,
-    renterUsername: null, // <-- limpiamos username
+    renterUsername: null,
     rentDate: null,
     endDate: null,
   });

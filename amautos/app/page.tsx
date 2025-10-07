@@ -36,8 +36,7 @@ export default function CarsPage() {
     if (!loading && !user) router.replace("/register");
     if (user) {
       import("@/lib/userUtils").then(async ({ getUserAdmin }) => {
-        const admin = await getUserAdmin(user.uid);
-        setIsAdmin(admin);
+        setIsAdmin(await getUserAdmin(user.uid));
       });
     }
   }, [loading, user, router]);
@@ -57,7 +56,6 @@ export default function CarsPage() {
     if (!model || !imageUrl || dailyRate <= 0) return;
     if (editingCar) await updateCar(editingCar.id, model, imageUrl, dailyRate);
     else await addCar(model, imageUrl, dailyRate);
-
     setShowDialog(false);
     setEditingCar(null);
   };
@@ -71,11 +69,10 @@ export default function CarsPage() {
       return showRentedOnly ? car.rentedBy && matchesSearch : matchesSearch;
     });
 
-    if (sortBy === "name") {
+    if (sortBy === "name")
       filtered.sort((a, b) => a.model.localeCompare(b.model));
-    } else if (sortBy === "price") {
+    else if (sortBy === "price")
       filtered.sort((a, b) => b.dailyRate - a.dailyRate);
-    }
 
     return filtered;
   }, [cars, showRentedOnly, search, sortBy]);
@@ -97,7 +94,6 @@ export default function CarsPage() {
 
       <section className="flex flex-col items-center justify-center flex-1 py-10 px-4">
         <div className="w-full max-w-5xl">
-          {/* 🔍 Search bar */}
           <div className="flex justify-center mb-4">
             <input
               type="text"
@@ -108,16 +104,11 @@ export default function CarsPage() {
             />
           </div>
 
-          {/* Controls (toggle + sort spinner) */}
           <div className="flex items-center justify-center mb-8 gap-2">
             {isAdmin && (
               <button
                 onClick={() => setShowRentedOnly((prev) => !prev)}
-                className={`px-3 py-1 rounded-lg text-sm font-semibold transition ${
-                  showRentedOnly
-                    ? "bg-red-600 text-white hover:bg-red-700"
-                    : "bg-cyan-500 text-white hover:bg-cyan-600"
-                } flex items-center gap-1`}
+                className={`px-3 py-1 rounded-lg text-sm font-semibold transition ${showRentedOnly ? "bg-red-600 text-white hover:bg-red-700" : "bg-cyan-500 text-white hover:bg-cyan-600"} flex items-center gap-1`}
               >
                 {showRentedOnly ? "Ver todos" : "Ver alquilados"}
               </button>
@@ -138,9 +129,7 @@ export default function CarsPage() {
                 title="Ordenar"
               >
                 <svg
-                  className={`w-4 h-4 transform transition-transform ${
-                    sortBy ? "rotate-90 text-cyan-400" : "text-white"
-                  }`}
+                  className={`w-4 h-4 transform transition-transform ${sortBy ? "rotate-90 text-cyan-400" : "text-white"}`}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={2}
@@ -161,7 +150,6 @@ export default function CarsPage() {
             </div>
           </div>
 
-          {/* Cars grid */}
           {loadingCars ? (
             <p className="text-gray-400">Cargando autos...</p>
           ) : displayedCars.length === 0 ? (
@@ -184,21 +172,21 @@ export default function CarsPage() {
                     <CarCard
                       car={car}
                       isAdmin={isAdmin}
-                      onRent={(id, days) =>
-                        rentCar(id, user.uid, days, user.email || undefined)
+                      onRent={(id, start, end) =>
+                        rentCar(
+                          id,
+                          user.uid,
+                          start,
+                          end,
+                          user.email || undefined,
+                        )
                       }
                       onDelete={deleteCar}
                       onEdit={(car) => {
                         setEditingCar(car);
                         setShowDialog(true);
                       }}
-                      onDeleteRent={(id) => {
-                        if (
-                          confirm("¿Seguro que querés cancelar este alquiler?")
-                        ) {
-                          deleteRent(id);
-                        }
-                      }}
+                      onDeleteRent={deleteRent}
                     />
                   </motion.div>
                 ))}
