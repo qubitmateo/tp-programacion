@@ -24,6 +24,10 @@ const mockHandlers = {
 };
 
 describe("CarCard component", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("renders car model, price, and availability", () => {
     render(<CarCard car={mockCar} isAdmin={false} {...mockHandlers} />);
 
@@ -44,32 +48,41 @@ describe("CarCard component", () => {
     expect(mockHandlers.onRent).toHaveBeenCalledWith("1", 3);
   });
 
-  it("shows renter info if car is rented", () => {
+  it("shows renter info and cancel button for user", () => {
     const rentedCar: Car = {
       ...mockCar,
       rentedBy: "user123",
-      renterUsername: "Jaque",
+      renterUsername: "Juan",
     };
+
     render(<CarCard car={rentedCar} isAdmin={false} {...mockHandlers} />);
 
-    expect(screen.getByText(/Alquilado por: Jaque/i)).toBeInTheDocument();
+    expect(screen.getByText(/Alquilado por: Juan/i)).toBeInTheDocument();
+    expect(screen.getByText(/Cancelar alquiler/i)).toBeInTheDocument();
     expect(screen.queryByText(/✅ Disponible/i)).toBeNull();
+
+    // Click the cancel button
+    fireEvent.click(screen.getByText(/Cancelar alquiler/i));
+    expect(mockHandlers.onDeleteRent).toHaveBeenCalledWith(rentedCar.id);
   });
 
-  it("calls admin handlers", () => {
+  it("shows admin edit/delete buttons when isAdmin is true", () => {
     const rentedCar: Car = {
       ...mockCar,
       rentedBy: "user123",
-      renterUsername: "Jaque",
+      renterUsername: "Juan",
     };
+
     render(<CarCard car={rentedCar} isAdmin={true} {...mockHandlers} />);
 
     const editButton = screen.getByText(/Editar/i);
     fireEvent.click(editButton);
     expect(mockHandlers.onEdit).toHaveBeenCalledWith(rentedCar);
 
-    const deleteRentButton = screen.getByText(/Eliminar alquiler/i);
-    fireEvent.click(deleteRentButton);
-    expect(mockHandlers.onDeleteRent).toHaveBeenCalledWith(rentedCar.id);
+    // Simulate confirm dialog for deletion
+    window.confirm = jest.fn(() => true);
+    const deleteButton = screen.getByText(/Eliminar/i);
+    fireEvent.click(deleteButton);
+    expect(mockHandlers.onDelete).toHaveBeenCalledWith(rentedCar.id);
   });
 });

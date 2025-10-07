@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { login } from "@/lib/firebaseAuth";
 import { useRouter } from "next/navigation";
@@ -23,41 +24,51 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-200">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
       <motion.form
         onSubmit={handleSubmit}
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-  className="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md flex flex-col gap-6 text-black"
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="bg-gray-900/70 backdrop-blur-md border border-gray-800 rounded-2xl shadow-xl p-10 w-full max-w-md flex flex-col gap-6"
       >
-  <h1 className="text-3xl font-bold text-blue-900 mb-2 text-center">Iniciar sesión</h1>
+        <h1 className="text-3xl font-extrabold text-cyan-400 text-center mb-2">
+          Iniciar sesión
+        </h1>
+
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition text-black placeholder-gray-500"
+          className="px-4 py-3 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
         />
+
         <input
           type="password"
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition text-black placeholder-gray-500"
+          className="px-4 py-3 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
         />
+
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
+          className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 text-white font-semibold py-3 rounded-lg transition"
         >
           Entrar
         </button>
-        {error && <p className="text-red-600 text-center">{error}</p>}
-        <p className="text-center">
-          ¿No tenés cuenta?{' '}
-          <Link href="/register" className="text-blue-600 underline hover:text-blue-800 transition">
+
+        {error && <p className="text-red-500 text-center">{error}</p>}
+
+        <p className="text-center text-gray-300">
+          ¿No tenés cuenta?{" "}
+          <Link
+            href="/register"
+            className="text-cyan-400 hover:text-cyan-300 underline transition"
+          >
             Registrate acá
           </Link>
         </p>
@@ -65,4 +76,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

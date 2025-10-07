@@ -45,14 +45,12 @@ export function CarCard({
             <span className="text-red-400 text-sm">
               ❌ Alquilado por: {car.renterUsername || car.rentedBy}
             </span>
-            {isAdmin && (
-              <button
-                onClick={() => onDeleteRent(car.id)}
-                className="mt-2 bg-gradient-to-r from-red-500 to-pink-600 hover:opacity-90 text-white font-semibold py-1 px-3 rounded-lg transition text-sm"
-              >
-                Eliminar alquiler
-              </button>
-            )}
+            <button
+              onClick={() => onDeleteRent(car.id)}
+              className="mt-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded-lg transition text-sm"
+            >
+              Cancelar alquiler
+            </button>
           </>
         ) : (
           <span className="text-green-400 text-sm">✅ Disponible</span>
@@ -72,7 +70,7 @@ export function CarCard({
             />
             <button
               onClick={() => onRent(car.id, days)}
-              className="bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition shadow w-full"
+              className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition shadow w-full"
             >
               Confirmar reserva
             </button>

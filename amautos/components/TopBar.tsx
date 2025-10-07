@@ -13,18 +13,14 @@ export function TopBar({ isAdmin, onAddCar, onLogout }: TopBarProps) {
 
   return (
     <nav className="w-full flex justify-between items-center px-8 py-4 bg-gray-950/70 backdrop-blur border-b border-gray-800 shadow-sm">
-      <span className="text-2xl font-extrabold tracking-wide flex items-center gap-2 text-cyan-400">
-        🚗 Amautos
-      </span>
+      <button
+        onClick={() => router.push("/profile")}
+        className="bg-gradient-to-r from-purple-500 to-purple-400 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
+      >
+        Mi perfil
+      </button>
 
       <div className="flex gap-3">
-        <button
-          onClick={() => router.push("/profile")}
-          className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
-        >
-          Mi perfil
-        </button>
-
         {isAdmin && (
           <button
             onClick={onAddCar}
@@ -38,7 +34,7 @@ export function TopBar({ isAdmin, onAddCar, onLogout }: TopBarProps) {
           onClick={onLogout}
           className="bg-gradient-to-r from-pink-500 to-red-500 hover:opacity-90 text-white font-bold py-2 px-5 rounded-lg transition shadow"
         >
-          Salir
+          Cerrar sesión
         </button>
       </div>
     </nav>
