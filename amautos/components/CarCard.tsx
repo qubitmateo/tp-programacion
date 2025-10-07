@@ -28,11 +28,18 @@ export function CarCard({
   onDeleteRent,
 }: CarCardProps) {
   const today = new Date();
+  today.setHours(0, 0, 0, 0); // Evitar errores por horas
+
   const [startDate, setStartDate] = useState<Date>(car.rentDate || today);
   const [endDate, setEndDate] = useState<Date>(car.endDate || today);
 
   const isRented = !!car.rentedBy;
 
+  // Calcular cantidad de días (INCLUSIVO)
+  const diffInMs = endDate.getTime() - startDate.getTime();
+  const days = Math.max(1, Math.ceil(diffInMs / (1000 * 60 * 60 * 24)) + 1);
+
+  // Validar fechas (permitir hoy, pero no pasadas)
   const invalidDates =
     !startDate ||
     !endDate ||
@@ -40,12 +47,18 @@ export function CarCard({
     startDate < today ||
     endDate < today;
 
-  const days = Math.max(
-    1,
-    Math.ceil(
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
-    ),
-  );
+  // Calcular precio total
+  const totalPrice = car.dailyRate * days;
+
+  // Formatear fechas a DD/MM/YYYY
+  const formatDate = (date: Date | undefined) => {
+    if (!date) return "";
+    return date.toLocaleDateString("es-AR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
 
   return (
     <motion.div
@@ -69,8 +82,7 @@ export function CarCard({
         {isRented ? (
           <div className="text-red-400 text-xs">
             Reservado por {car.renterUsername} <br />
-            {car.rentDate?.toLocaleDateString()} →{" "}
-            {car.endDate?.toLocaleDateString()}
+            {formatDate(car.rentDate)} → {formatDate(car.endDate)}
           </div>
         ) : (
           !isAdmin && (
@@ -82,7 +94,7 @@ export function CarCard({
                   locale="es"
                   dateFormat="dd/MM/yyyy"
                   className="bg-gray-800 text-white p-1 rounded w-[100px] text-sm"
-                  minDate={today}
+                  minDate={today} // permitir hoy
                 />
                 <ReactDatePicker
                   selected={endDate}
@@ -94,7 +106,7 @@ export function CarCard({
                 />
               </div>
 
-              <PriceDisplay total={car.dailyRate * days} />
+              <PriceDisplay total={totalPrice} />
 
               <button
                 onClick={() => onRent(car.id, startDate, endDate)}
@@ -107,6 +119,7 @@ export function CarCard({
               >
                 Reservar
               </button>
+
               {invalidDates && (
                 <p className="text-red-400 text-xs mt-1">Fechas inválidas</p>
               )}

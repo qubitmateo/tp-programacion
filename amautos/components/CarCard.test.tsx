@@ -1,10 +1,14 @@
+/**
+ * @jest-environment jsdom
+ */
+import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { CarCard } from "@/components/CarCard";
 import { Car } from "@/lib/carUtils";
 
 const mockCar: Car = {
   id: "1",
-  model: "Test Car",
+  model: "Toyota Corolla",
   imageUrl:
     "https://upload.wikimedia.org/wikipedia/commons/f/f1/2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg",
   dailyRate: 100,
@@ -15,7 +19,7 @@ const mockCar: Car = {
   createdAt: new Date(),
 };
 
-// Mock handlers
+// Manejadores simulados
 const mockHandlers = {
   onRent: jest.fn(),
   onDelete: jest.fn(),
@@ -23,32 +27,30 @@ const mockHandlers = {
   onDeleteRent: jest.fn(),
 };
 
-describe("CarCard component", () => {
+describe("Componente CarCard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders car model and daily price", () => {
+  it("muestra el modelo del auto y el precio diario", () => {
     render(<CarCard car={mockCar} isAdmin={false} {...mockHandlers} />);
-
-    expect(screen.getByText("Test Car")).toBeInTheDocument();
-    expect(screen.getByText(/Precio diario: \$100/i)).toBeInTheDocument();
-    // The PriceDisplay will also show total price (initially 1 day)
-    expect(screen.getByText(/💰 100/i)).toBeInTheDocument();
+    expect(screen.getByText("Toyota Corolla")).toBeInTheDocument();
+    expect(screen.getByText("Precio diario: $100")).toBeInTheDocument();
+    expect(screen.getByText(/💰 100/)).toBeInTheDocument();
   });
 
-  it("allows user to pick dates and calls onRent", () => {
+  it("permite seleccionar fechas y llama a onRent con las fechas correctas", () => {
     render(<CarCard car={mockCar} isAdmin={false} {...mockHandlers} />);
 
-    const startInput = screen.getAllByRole("textbox")[0];
-    const endInput = screen.getAllByRole("textbox")[1];
-    const button = screen.getByText(/Reservar/i);
+    const inputs = screen.getAllByRole("textbox");
+    const inputInicio = inputs[0];
+    const inputFin = inputs[1];
+    const boton = screen.getByText("Reservar");
 
-    // Change start and end dates
-    fireEvent.change(startInput, { target: { value: "2030-01-01" } });
-    fireEvent.change(endInput, { target: { value: "2030-01-03" } });
-
-    fireEvent.click(button);
+    // Cambiar fechas (simula DD/MM/YYYY)
+    fireEvent.change(inputInicio, { target: { value: "01/01/2030" } });
+    fireEvent.change(inputFin, { target: { value: "03/01/2030" } });
+    fireEvent.click(boton);
 
     expect(mockHandlers.onRent).toHaveBeenCalledWith(
       mockCar.id,
@@ -57,8 +59,8 @@ describe("CarCard component", () => {
     );
   });
 
-  it("shows renter info and cancel button when rented", () => {
-    const rentedCar: Car = {
+  it("muestra la información del usuario y las fechas cuando está reservado", () => {
+    const autoRentado: Car = {
       ...mockCar,
       rentedBy: "user123",
       renterUsername: "Juan",
@@ -66,20 +68,25 @@ describe("CarCard component", () => {
       endDate: new Date("2030-01-05"),
     };
 
-    render(<CarCard car={rentedCar} isAdmin={false} {...mockHandlers} />);
-
-    expect(screen.getByText(/Reservado por Juan/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/01\/01\/2030 → 05\/01\/2030/i),
-    ).toBeInTheDocument();
-
-    const cancelButton = screen.getByText(/Cancelar reserva/i);
-    fireEvent.click(cancelButton);
-    expect(mockHandlers.onDeleteRent).toHaveBeenCalledWith(rentedCar.id);
+    render(<CarCard car={autoRentado} isAdmin={false} {...mockHandlers} />);
+    expect(screen.getByText(/Reservado por Juan/)).toBeInTheDocument();
+    expect(screen.getByText("01/01/2030 → 05/01/2030")).toBeInTheDocument();
   });
 
-  it("shows admin edit/delete buttons when isAdmin is true", () => {
-    const rentedCar: Car = {
+  it("muestra los botones de edición y eliminación cuando es admin", () => {
+    render(<CarCard car={mockCar} isAdmin={true} {...mockHandlers} />);
+
+    const botonEditar = screen.getByText("Editar");
+    fireEvent.click(botonEditar);
+    expect(mockHandlers.onEdit).toHaveBeenCalledWith(mockCar);
+
+    const botonEliminar = screen.getByText("Eliminar");
+    fireEvent.click(botonEliminar);
+    expect(mockHandlers.onDelete).toHaveBeenCalledWith(mockCar.id);
+  });
+
+  it("muestra el botón 'Cancelar reserva' cuando el auto está rentado y es admin", () => {
+    const autoRentado: Car = {
       ...mockCar,
       rentedBy: "user123",
       renterUsername: "Juan",
@@ -87,29 +94,23 @@ describe("CarCard component", () => {
       endDate: new Date("2030-01-05"),
     };
 
-    render(<CarCard car={rentedCar} isAdmin={true} {...mockHandlers} />);
-
-    const editButton = screen.getByText(/Editar/i);
-    fireEvent.click(editButton);
-    expect(mockHandlers.onEdit).toHaveBeenCalledWith(rentedCar);
-
-    const deleteButton = screen.getByText(/Eliminar/i);
-    fireEvent.click(deleteButton);
-    expect(mockHandlers.onDelete).toHaveBeenCalledWith(rentedCar.id);
+    render(<CarCard car={autoRentado} isAdmin={true} {...mockHandlers} />);
+    const botonCancelar = screen.getByText("Cancelar reserva");
+    fireEvent.click(botonCancelar);
+    expect(mockHandlers.onDeleteRent).toHaveBeenCalledWith(autoRentado.id);
   });
 
-  it("disables Reserve button for invalid dates", () => {
+  it("desactiva el botón Reservar cuando las fechas son inválidas", () => {
     render(<CarCard car={mockCar} isAdmin={false} {...mockHandlers} />);
+    const inputs = screen.getAllByRole("textbox");
+    const inputInicio = inputs[0];
+    const inputFin = inputs[1];
+    const boton = screen.getByText("Reservar");
 
-    const startInput = screen.getAllByRole("textbox")[0];
-    const endInput = screen.getAllByRole("textbox")[1];
-    const button = screen.getByText(/Reservar/i);
+    fireEvent.change(inputInicio, { target: { value: "05/01/2030" } });
+    fireEvent.change(inputFin, { target: { value: "01/01/2030" } });
 
-    // End date before start date
-    fireEvent.change(startInput, { target: { value: "2030-01-05" } });
-    fireEvent.change(endInput, { target: { value: "2030-01-01" } });
-
-    expect(button).toBeDisabled();
-    expect(screen.getByText(/Fechas inválidas/i)).toBeInTheDocument();
+    expect(boton).toBeDisabled();
+    expect(screen.getByText("Fechas inválidas")).toBeInTheDocument();
   });
 });

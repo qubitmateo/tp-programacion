@@ -10,6 +10,16 @@ interface RentedCarsListProps {
   onDeleteRent: (id: string) => void;
 }
 
+// 🧠 Helper para mostrar fecha como dd/MM/yyyy
+function formatDate(date?: Date | null) {
+  if (!date) return "";
+  return new Date(date).toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 export function RentedCarsList({
   cars,
   isAdmin,
@@ -59,15 +69,12 @@ export function RentedCarsList({
 
             <h3 className="font-bold text-lg text-cyan-300">{car.model}</h3>
 
-            {/* PriceDisplay component */}
             <PriceDisplay total={totalPrice} />
 
             <p className="text-gray-400">
-              📅 Desde: {car.rentDate?.toLocaleDateString()}
+              📅 Desde: {formatDate(car.rentDate)}
             </p>
-            <p className="text-gray-400">
-              🏁 Hasta: {car.endDate?.toLocaleDateString()}
-            </p>
+            <p className="text-gray-400">🏁 Hasta: {formatDate(car.endDate)}</p>
 
             <button
               onClick={() => handleCancelRent(car.id, car.model)}
