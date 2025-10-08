@@ -6,13 +6,7 @@ Bienvenido a **Amautos**, una plataforma web simple y divertida para gestionar e
 
 ## Capturas
 
-![Inicio de sesión](https://imgur.com/7FtVGPN)
-
-![Perfil del usuario](https://imgur.com/OsAY51r)
-
-![Inicio](https://imgur.com/IRuBYbb)
-
-![Inicio del admin](https://imgur.com/d2W2Jkj)
+![Repositorio de capturas](https://imgur.com/a/PDoXFsh)
 
 ## ¿Qué podés hacer?
 
