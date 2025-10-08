@@ -5,7 +5,10 @@ Bienvenido a **Amautos**, una plataforma web simple y divertida para gestionar e
 ---
 
 ## Capturas
-<img src="https://imgur.com/a/PDoXFsh"/>
+![Inicio de sesión](https://i.imgur.com/7FtVGPN.png)
+![Inicio](https://i.imgur.com/IRuBYbb.png)
+![Perfil](https://i.imgur.com/OsAY51r.png)
+![Inicio de admin](https://i.imgur.com/d2W2Jkj.png)
 
 ## ¿Qué podés hacer?
 
@@ -27,13 +30,15 @@ Bienvenido a **Amautos**, una plataforma web simple y divertida para gestionar e
 - Panel de administración para agregar autos (solo admins)
 - Guardado de autos en Firestore
 - Diseño responsive y colores amigables
-
-### Tareas por hacer 🛠️
 - Permitir editar y borrar autos (solo admins)
 - Agregar detalles extra a los autos (año, precio, etc.)
 - Guardar reservas en Firestore
+
+### Tareas por hacer 🛠️
 - Mejorar validaciones de formularios
-- Agregar feedback visual a las acciones
+- Implementar método de pago
+- Filtrar autos por fecha
+- Permitir reservar el auto más de una vez dependiendo la disponibilidad de fechas.
 - Hostear la página con un dominio gratis con Netlify.
 
 ---
@@ -41,6 +46,13 @@ Bienvenido a **Amautos**, una plataforma web simple y divertida para gestionar e
 ## ¿Cómo correr el proyecto?
 
 1. Cloná el repo y ubicáte en la carpeta `amautos`.
-2. Instalá las dependencias con `npm install`.
-3. Configurá tu archivo `.env.local` con las credenciales de Firebase.
-4. Ejecutá `npm run dev` y abrí [http://localhost:3000](http://localhost:3000).
+3. Instalá las dependencias con `npm install`.
+4. Configurá tu archivo `.env.local` con las credenciales de Firebase dentro de la carpeta `amautos`.
+5. Ejecutá `npm run dev` y abrí [http://localhost:3000](http://localhost:3000).
+
+---
+
+## ¿Cómo correr los tests?
+
+1. En la carpeta `amautos`.
+2. Ejecutá `npm run test`
