@@ -1,17 +1,22 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
-module.exports = {
-  preset: "ts-jest/presets/js-with-babel", // Usar Babel para JSX
-  testEnvironment: "jest-environment-jsdom", // Para tests de React
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"], // Setup jest-dom
+// jest.config.js
+const nextJest = require("next/jest");
+
+const createJestConfig = nextJest({
+  dir: "./", // Path to your Next.js app
+});
+
+const customJestConfig = {
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1", // Tu alias @
-    "\\.(css|scss|sass)$": "identity-obj-proxy", // Mock CSS
-    "\\.(png|jpg|jpeg|gif|svg)$": "<rootDir>/__mocks__/fileMock.js", // Mock imágenes
+    "^@/(.*)$": "<rootDir>/$1",
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy",
   },
-  transform: {
-    "^.+\\.[tj]sx?$": "babel-jest", // Transformar TSX/JSX con Babel
-  },
-  transformIgnorePatterns: [
-    "/node_modules/", // Ignorar node_modules
-  ],
+  testEnvironment: "jest-environment-jsdom",
 };
+
+module.exports = async () => ({
+  ...(await createJestConfig(customJestConfig)()),
+  transformIgnorePatterns: [
+    "/node_modules/(?!(react-datepicker|lucide-react|date-fns)/)",
+  ],
+});
