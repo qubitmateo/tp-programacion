@@ -5,8 +5,7 @@ Bienvenido a **Amautos**, una plataforma web simple y divertida para gestionar e
 ---
 
 ## Capturas
-
-![Repositorio de capturas](https://imgur.com/a/PDoXFsh)
+<img src="https://imgur.com/a/PDoXFsh"/>
 
 ## ¿Qué podés hacer?
 
